@@ -1,0 +1,84 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <title>Auth Frontend</title>
+  <style>
+    body { font-family: Arial, sans-serif; margin: 20px; }
+    input, button { margin: 5px 0; padding: 8px; width: 250px; }
+    .container { margin-bottom: 30px; }
+  </style>
+</head>
+<body>
+
+  <h2>Register</h2>
+  <div class="container">
+    <input type="text" id="registerName" placeholder="Name"><br>
+    <input type="email" id="registerEmail" placeholder="Email"><br>
+    <input type="password" id="registerPassword" placeholder="Password"><br>
+    <button onclick="register()">Register</button>
+    <p id="registerResult"></p>
+  </div>
+
+  <h2>Login</h2>
+  <div class="container">
+    <input type="email" id="loginEmail" placeholder="Email"><br>
+    <input type="password" id="loginPassword" placeholder="Password"><br>
+    <button onclick="login()">Login</button>
+    <p id="loginResult"></p>
+  </div>
+
+  <h2>Profile</h2>
+  <div class="container">
+    <button onclick="getProfile()">Get Profile</button>
+    <p id="profileResult"></p>
+  </div>
+
+  <script>
+    let token = "";
+
+    async function register() {
+      const res = await fetch('http://localhost:3000/api/auth/register', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({
+          name: document.getElementById('registerName').value,
+          email: document.getElementById('registerEmail').value,
+          password: document.getElementById('registerPassword').value,
+        }),
+      });
+      const data = await res.json();
+      document.getElementById('registerResult').innerText = data.message || data.error;
+    }
+
+    async function login() {
+      const res = await fetch('http://localhost:3000/api/auth/login', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({
+          email: document.getElementById('loginEmail').value,
+          password: document.getElementById('loginPassword').value,
+        }),
+      });
+      const data = await res.json();
+      if (data.token) {
+        token = data.token;
+        document.getElementById('loginResult').innerText = data.message;
+      } else {
+        document.getElementById('loginResult').innerText = data.message || data.error;
+      }
+    }
+
+    async function getProfile() {
+      const res = await fetch('http://localhost:3000/api/user/profile', {
+        method: 'GET',
+        headers: {
+          'Authorization': `Bearer ${token}`,
+        },
+      });
+      const data = await res.json();
+      document.getElementById('profileResult').innerText = data.message || data.error;
+    }
+  </script>
+</body>
+</html>
